@@ -1,5 +1,6 @@
 import 'package:app_weather/bloc/weather_bloc.dart';
 import 'package:app_weather/bloc/weather_repository.dart';
+import 'package:app_weather/components/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,29 +40,56 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: BlocBuilder(
-          bloc: bloc,
-          builder: (context, state) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  city,
-                  style: Theme.of(context).textTheme.headline4,
-                ),
-                SizedBox(height: 30),
-                Container(
-                  padding: EdgeInsets.all(20),
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(hintText: "Введите город"),
-                  ),
-                )
-              ],
-            );
-          },
-        ),
+      body: Column(
+        children: [
+          SizedBox(height: 30),
+          Center(
+            child: BlocBuilder(
+              bloc: bloc,
+              builder: (context, state) {
+                if (state is WeatherInitial) {
+                  return Loading();
+                } else if (state is WeatherLoaded) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        state.model.name.toString(),
+                        style: Theme.of(context).textTheme.headline4,
+                      ),
+                      SizedBox(height: 30),
+                      Text(
+                        "Температура: " +
+                            state.model.main!.temp.toString() +
+                            " C",
+                        style: Theme.of(context).textTheme.headline6,
+                      ),
+                    ],
+                  );
+                } else if (state is WeatherError) {
+                  return Text("Oops connect failed");
+                }
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "",
+                      style: Theme.of(context).textTheme.headline4,
+                    ),
+                    SizedBox(height: 30),
+                  ],
+                );
+              },
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.all(20),
+            child: TextField(
+              controller: _controller,
+              decoration: InputDecoration(hintText: "Введите город"),
+            ),
+          )
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
