@@ -11,6 +11,6 @@ class WeatherLoaded extends WeatherState {
 }
 
 class WeatherError extends WeatherState {
-  final String message;
+  final WeatherExceptions message;
   WeatherError(this.message);
 }

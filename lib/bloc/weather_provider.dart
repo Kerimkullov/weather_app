@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app_weather/helper/api_requester.dart';
+import 'package:app_weather/helper/weather_exception.dart';
 
 import 'package:app_weather/model/weather_model.dart';
 import 'package:dio/dio.dart';
@@ -15,11 +16,9 @@ class WeatherProvider {
       if (response.statusCode == 200) {
         return WeatherModel.fromJson(response.data);
       }
-      print(response.statusCode);
-      throw Exception(response.statusCode);
+      throw WeatherExceptions.catchError(response);
     } catch (e) {
-      print(e);
-      throw Exception(e);
+      throw WeatherExceptions.catchError(e);
     }
   }
 }

@@ -32,11 +32,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final bloc = WeatherBloc(WeatherRepository());
+  var _scaffoldkey = GlobalKey<ScaffoldState>();
   TextEditingController _controller = TextEditingController();
   String city = "Бишкек";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldkey,
       appBar: AppBar(
         title: Text(widget.title),
       ),
@@ -44,42 +46,67 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           SizedBox(height: 30),
           Center(
-            child: BlocBuilder(
+            child: BlocListener(
               bloc: bloc,
-              builder: (context, state) {
-                if (state is WeatherInitial) {
-                  return Loading();
+              listener: (context, state) {
+                if (state is WeatherError) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(state.message.message.toString())));
                 } else if (state is WeatherLoaded) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Успешно загрузилось")));
+                }
+              },
+              child: BlocBuilder(
+                bloc: bloc,
+                builder: (context, state) {
+                  if (state is WeatherInitial) {
+                    return Loading();
+                  } else if (state is WeatherLoaded) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          state.model.name.toString(),
+                          style: Theme.of(context).textTheme.headline4,
+                        ),
+                        SizedBox(height: 30),
+                        Text(
+                          "Температура: " +
+                              state.model.main!.temp.toString() +
+                              " C",
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                      ],
+                    );
+                  } else if (state is WeatherError) {
+                    return Column(
+                      children: [
+                        Text("OOps произошла ошибка"),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        TextButton(
+                            onPressed: () {
+                              bloc.add(GetWeatherEvent(city));
+                              city = _controller.text;
+                            },
+                            child: Text("Повторить снова"))
+                      ],
+                    );
+                  }
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        state.model.name.toString(),
+                        "",
                         style: Theme.of(context).textTheme.headline4,
                       ),
                       SizedBox(height: 30),
-                      Text(
-                        "Температура: " +
-                            state.model.main!.temp.toString() +
-                            " C",
-                        style: Theme.of(context).textTheme.headline6,
-                      ),
                     ],
                   );
-                } else if (state is WeatherError) {
-                  return Text("Oops connect failed");
-                }
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      "",
-                      style: Theme.of(context).textTheme.headline4,
-                    ),
-                    SizedBox(height: 30),
-                  ],
-                );
-              },
+                },
+              ),
             ),
           ),
           Container(

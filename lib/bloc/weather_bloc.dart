@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app_weather/bloc/weather_repository.dart';
+import 'package:app_weather/helper/weather_exception.dart';
 import 'package:app_weather/model/weather_model.dart';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
@@ -24,7 +25,7 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
         yield WeatherLoaded(data);
       }
     } catch (e) {
-      yield WeatherError(e.toString());
+      yield WeatherError(WeatherExceptions.catchError(e));
     }
   }
 }
